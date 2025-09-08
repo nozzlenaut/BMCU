@@ -12,3 +12,5 @@ My collection of resources for my x1c BMCU build. I noticed everything is not ne
 
 
 Notes:
+
+Currently in a non-working state on X1 series printers. BMCU shows as an AMS on firmware 6-8, but not at all on 9 and 10. With 6-8, filament selection does not save and disappears after a few seconds. x1plus also does not seem to matter. Waiting for firware 21 on the BMCU and see what updates that brings.
