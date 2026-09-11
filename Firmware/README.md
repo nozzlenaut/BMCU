@@ -93,6 +93,30 @@ Its firmware build references BMCU-C-PJARCZAK V10.5 and applies a small UART-foc
 
 **[cuihuir/bmcu_klipper](https://github.com/cuihuir/bmcu_klipper)** contains useful BambuBus captures, CRC/protocol work and early Klipper integration experiments. It is best treated as a protocol/research reference now rather than the default install path.
 
+## Experimental firmware/software worth knowing about
+
+These are not my default recommendation, but they are active/recent enough to be useful references when Bambu firmware checks get in the way.
+
+### cailinkins/BMCU-C-PJARCZAK
+
+[cailinkins/BMCU-C-PJARCZAK](https://github.com/cailinkins/BMCU-C-PJARCZAK) is a fork made specifically to work around the A1 1.08-era firmware-version mismatch check.
+
+Treat it as a compatibility fork rather than the main upstream. Check its age and tested printer version before flashing it.
+
+### BMCU-X
+
+[JustablockCode/BMCU-X](https://github.com/JustablockCode/BMCU-X) appeared in August 2026.
+
+Its stated focus is removing the "wrong firmware version" error. The README currently lists A1 Mini firmware **01.08.01.00 and older** as tested, with A1/A2L still unconfirmed. It also explicitly warns that the BMCU firmware currently needs to be updated whenever the printer firmware changes.
+
+Interesting project, but definitely still experimental.
+
+### OrcaStudio
+
+[jarczakpawel/OrcaStudio](https://github.com/jarczakpawel/OrcaStudio) is a Bambu Studio/OrcaSlicer-oriented fork with BMCU fixes for A1/A1 Mini firmware locks and restored BambuNetwork support.
+
+This is slicer/software-side rather than BMCU controller firmware, but it is relevant if the printer itself works and Studio-side compatibility warnings/features are the annoying part.
+
 ## Safety
 
 - Never flash while the BMCU is connected to the printer.
