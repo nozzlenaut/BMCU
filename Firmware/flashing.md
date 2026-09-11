@@ -1,170 +1,105 @@
-If you did **not** solder the motherboard yourself, flashing is usually **not required**. Unless you want to upgrade the firmware.
+# Flashing BMCU firmware
 
-[¶](#️-warning) ⚠️ **WARNING**
-------------------------------
+> **2026 update:** The easiest current path is [BMCU Flasher](https://github.com/jarczakpawel/BMCU-Flasher). The older WCHISPTool workflow is kept below only as a legacy/fallback method.
 
-🔥 **Before flashing, ensure there are no soldering issues!!!! Check for power short circuits!!!!** 🔥  
-🔥 **Before flashing, ensure there are no soldering issues!!!! Check for power short circuits!!!!** 🔥  
-🔥 **Before flashing, ensure there are no soldering issues!!!! Check for power short circuits!!!!** 🔥  
+## Recommended method: BMCU Flasher
 
-[¶](#required-tools) **Required Tools**
----------------------------------------
+BMCU Flasher supports:
 
-1.  **Multiple Dupont Wires** (To connect the flasher and the BMCU mainboard).
-2.  **USB to Serial Adapter**
-3.  **Computer** runs windows. -> If you're using a Mac/Linux, flashing is possible, but I don't have any tutorials or resources for mac.
-4.  **Software: WCHISPTool**  
-    The classic version used in this tutoriel : [wchisptool-v3.3.7z](/assets/files/wchisptool-v3.3.7z)  
-    A newer version : [download at WCH website](https://www.wch-ic.com/downloads/WCHISPTool_Setup_exe.html)
+- Windows
+- Linux
+- macOS
+- Android
+- online firmware selection/download
+- local `.bin` files
 
-[¶](#flashing-with-uart-ttl-using-ch340) Flashing with UART (TTL) using CH340
-=============================================================================
+For current Bambu-compatible 370C firmware, start with:
 
-### [¶](#h-1-connect-the-bmcu-mainboard-and-usb-serial-tool) 1. **Connect the BMCU Mainboard and USB Serial Tool**
+- [BMCU-C-PJARCZAK](https://github.com/jarczakpawel/BMCU-C-PJARCZAK)
+- [Latest releases](https://github.com/jarczakpawel/BMCU-C-PJARCZAK/releases)
 
-⚠️ **DO NOT connect the BMCU to the printer during the entire process!**
+The current release at the time this page was refreshed is **V10.5**.
 
-*   Open the software  
-    ![1.png](/assets/images/bmcu_flashing/1.png)
-    
-*   Connect wires according to the wiring instructions.
-    
-    BMCU
-    
-    USB Serial Tool
-    
-    R
-    
-    TXD
-    
-    T
-    
-    RXD
-    
-    ➕
-    
-    3V3
-    
-    ➖
-    
-    GND
-    
+### Before flashing
 
-> You may receive a yellow jumper cap, if it is similar to the converter on the right, no need to use it.  
-> Connect 3.3V as VCC to the '+' pin on the BMCU mainboard.
+1. **Disconnect BMCU from the printer.**
+2. Power the printer off completely before connecting/disconnecting BMCU hardware.
+3. Confirm you actually have the expected board revision. BMCU 370C uses Hall-sensor subboards; sellers sometimes mix revisions.
+4. If using V10.3 or newer, plan to boot after flashing with **all four filament channels empty** for calibration.
 
-![wiring_diagram_1.jpg](/assets/images/bmcu_flashing/wiring_diagram_1.jpg)  
-![wiring_diagram_2.png](/assets/images/bmcu_flashing/wiring_diagram_2.png)
+### Firmware selection notes
 
-> If you don't see a serial device here, please install the CH340 chip driver  
-> [https://www.arduined.eu/ch340-windows-10-driver-download/#google\_vignette](https://www.arduined.eu/ch340-windows-10-driver-download/#google_vignette)
+The upstream firmware package contains multiple builds. Read the included selection guides instead of picking a random binary.
 
-### [¶](#h-2-connect-the-usb-serial-tool-to-your-pc) 2. **Connect the USB Serial Tool to Your PC**
+General upstream guidance:
 
-*   Your computer should recognize the serial port automatically.
-*   The COM port number might differ from the example in the image.
+- choose the correct printer/load mode first
+- `standard(A1)` is the normal A1-style option
+- `soft_load(A1)` exists for A1/A1 Mini setups that grind/click with stronger loading
+- `high_force_load(P1S)` is intended for P1S-style stronger loading
+- choose the desired AUTOLOAD / RGB / AMS slot variant after that
+- configure the printer as **AMS**, not AMS Lite
 
-![3.png](/assets/images/bmcu_flashing/3.png)
+### First boot / calibration (V10.3+)
 
-* * *
+On first boot after flashing:
 
-### [¶](#h-3-configure-wchisptool-settings) 3. **Configure WCHISPTool Settings**
+- remove filament from every channel
+- allow the firmware to calibrate empty-channel detection
 
-Open the `WCHISPTool` software and set the following options:
+To re-calibrate later:
 
-*   **Chip Model:** `CH32V203`
-*   **Download Type:** `SerialPort`
-*   **DI – Baud Rate:** `1M`
-*   **SerialPort:** Auto-detected (your COM port)
-*   **User File:** Choose the firmware `.bin` file (available from our wiki)
+1. remove all filament
+2. hold any one buffer in position for about **5 seconds**
 
-![bmcu_flash.png](/assets/images/bmcu_flashing/bmcu_flash.png)
+## X1 / X1C warning
 
-* * *
+X1 compatibility has improved compared with the old 0019/0020-era firmware, but it is still sensitive to printer firmware.
 
-### [¶](#h-4-unlock-the-chip-protection) 4. **Unlock the Chip Protection**
+Upstream issue #66 documents a 2026 X1C firmware change that restored recognition and filament-info retention for testers. A later open report (#141) describes intermittent AMS communication loss with X1C firmware 01.11.02.00 and BMCU 10.5.
 
-This is a **critical step** before flashing the firmware.
+Do not assume a BMCU/printer firmware combination is safe to update blindly on X1/X1C. Check the current upstream issues before changing a known-working setup.
 
-#### [¶](#recommended-method) ✅ Recommended Method:
+- https://github.com/jarczakpawel/BMCU-C-PJARCZAK/issues/66
+- https://github.com/jarczakpawel/BMCU-C-PJARCZAK/issues/141
 
-1.  **Hold down the B button** (do **not** release it throughout).
-2.  While holding B, **briefly press the R button** once.
-3.  While **still holding B**, click the **"Remove Protect"** button in the WCHISPTool software.  
-    ![4.png](/assets/images/bmcu_flashing/4.png)
+## Legacy WCHISPTool method
 
-If successful, you’ll see a red **“Unlocked”** message in the tool.  
-![remove protect successful.png](/assets/images/bmcu_flashing/remove_protect_successful.png)
+This is retained for older boards/workflows or troubleshooting. For most people, use BMCU Flasher instead.
 
-> ⚠️ If it keeps failing:  
-> If you build your own PCB, please always check first for any soldering issues, such as solder bridges on resistor arrays, solder bridges on the CH32V chip, or short circuits in the circuit.
-> 
-> *   First, try again using the same button sequence carefully, hold always the B button.
-> *   Second, **double-click the “Download” button** to force the chip into response mode, then try "Remove Protect" again.
-> *   （Rare but indeed some chips will perform like this) try **swapping the TX and RX wires** (i.e., TX-to-TX and RX-to-RX instead of cross).
+### Hardware
 
-* * *
+- CH340 or equivalent USB-to-UART adapter
+- Dupont wires
+- PC
+- BMCU disconnected from the printer
 
-### [¶](#h-5-flash-the-firmware) 5. **Flash the Firmware**
+Typical TTL wiring:
 
-Click the **Download** button.
+```text
+BMCU R / RX  <- adapter TX
+BMCU T / TX  -> adapter RX
+BMCU GND     -> adapter GND
+```
 
-*   Be patient during the process.
-*   If flashing is successful, it should look like this:  
-    ![download_successful.png](/assets/images/bmcu_flashing/download_successful.png)
+Only use the required power connection for the specific flashing method/board revision you are following. Do not casually mix printer power, USB power and adapter power.
 
-#### [¶](#️-if-flashing-fails) ⚠️ If Flashing Fails:
+### WCHISPTool settings used by the older guide
 
-*   Try **pressing and holding the B button** while clicking “Download”.
-*   Alternatively, try changing the **baud rate to 115200**.
-*   In rare cases, try **reversing TX and RX** (TX-to-TX, RX-to-RX) if not already done.
+- Chip model: `CH32V203`
+- Download type: `SerialPort`
+- Baud: `1M` (115200 may help if communication is unreliable)
+- Select the intended firmware `.bin`
 
-* * *
+The old process generally used the board's Boot/Reset buttons to enter the CH32 bootloader, remove protection if necessary, then download the binary.
 
-### [¶](#h-6-reboot-the-board) 6. **Reboot the Board**
+Because the modern BMCU Flasher automates this workflow and supports more operating systems, it should now be considered the primary method.
 
-*   Press the **R button** once.
-*   The **red LED on the mainboard** should now light up.
-*   🎉 **Congratulations! Firmware flashing is complete!** 🎉
+## Klipper firmware is different
 
-[¶](#with-type-c-interface) With Type-C interface
-=================================================
+Do **not** flash normal Bambu-compatible firmware if your goal is one of the Klipper integrations without reading that project's instructions.
 
-### [¶](#open-the-software) Open the software
+- [BMCU-Klipper](https://github.com/jarczakpawel/BMCU-Klipper) includes its own BMCU firmware and host integration.
+- [klipper-bmcu-libre](https://github.com/kurtjcu/klipper-bmcu-libre) patches the 370C firmware to expose standard UART over USB-C for compatible Type-C boards.
 
-![1.png](/assets/images/bmcu_flashing/1.png)
-
-### [¶](#configure-wchisptool-settings) Configure WCHISPTool Settings
-
-Open the `WCHISPTool` software and set the following options:
-
-*   **Chip Model:** `CH32V203`
-*   **Download Type:** Still `Serial Port`
-*   **DI – Baud Rate:** `1M`
-*   **User File:** Choose the firmware `.bin` file (available from our wiki)
-*   Tick the "Serial Auto DI" option.
-
-![bmcu_flash_typec.png](/assets/images/bmcu_flashing/bmcu_flash_typec.png)
-
-### [¶](#action-sequence) Action sequence
-
-Click : `Remove Protect` -> `Download` -> `Remove Protect` Again -> `Download` Again -> Repeat this loop until done(normolly the second download will be successful, if not check if you done something wrong)  
-You might see some error messages during the first loop.
-
-[¶](#using-mac-linux) Using Mac / Linux
-=======================================
-
-todo
-
-[¶](#testing) Testing
-=====================
-
-**⚠️⚠️⚠️Avoid hot plugging and unplugging the motherboard and printer cables.⚠️⚠️⚠️**  
-The right approach（just in case you are not sure what to do):
-
-1.  Power off the printer
-2.  Connect the BMCU to the printer
-3.  Switch on the printer power
-4.  You should see AMS appear in the consumables option, even if you have not inserted consumables, it may show that consumables are present in some channels (known bug)
-5.  Power off the printer
-6.  Disconnect the BMCU cable
+See [../KLIPPER.md](../KLIPPER.md).
